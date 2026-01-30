@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .box {
+            width: 400px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 25px 30px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        #todo_input {
+            width: calc(100% - 80px);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 14px;
+        }
+
+        #btn_add {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #btn_add:hover {
+            background-color: #45a049;
+        }
+
+        #todo_list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        #todo_list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9f9f9;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+
+        #todo_list li:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        #todo_list li span {
+            flex: 1;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        #todo_list li span.done {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        #todo_list button {
+            margin-left: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 8px;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        #todo_list button:hover {
+            opacity: 0.8;
+        }
+
+        #todo_list button.done-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #todo_list button.edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        #todo_list button.delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<center>
+    <div class="box" id="box">
+        <label>Todo: </label>
+        <input id="todo_input" placeholder="Enter your todo" type="text">
+        <br>
+        <br>
+        <input type="button" value="Add" id="btn_add">
+        <hr>
+
+
+        <ul id="todo_list"></ul>
+        <br>
+    </div>
+</center>
+
+<script>
+    let todo_arr = []
+    let todo_list = document.getElementById("todo_list")
+    let btn_add = document.getElementById("btn_add")
+    let todo_input = document.getElementById("todo_input")
+
+    renderTodolist()
+
+    function renderTodolist() {
+        let task_string = ""
+        todo_arr.forEach((item, index) => {
+            task_string += `
+            <li>
+                <span style="text-decoration: ${item.isDone ? 'line-through' : 'none'}">
+                    <strong>${index + 1}.</strong> ${item.task}
+                </span>
+                <input type="button" value="✅" onclick="DoneTask(${item.id})">
+                <input type="button" value="📝" onclick="EditTask(${item.id})">
+                <input type="button" value="❌" onclick="deleteTask(${item.id})">
+            </li>
+        `
+        })
+        todo_list.innerHTML = task_string
+    }
+
+    btn_add.addEventListener('click', function () {
+        let todo_text = todo_input.value.trim()
+        if (!todo_text) return alert("Please enter a task!")
+
+        const exists = todo_arr.some(item => item.task.toLowerCase() === todo_text.toLowerCase())
+        if (exists) {
+            alert("This task already exists!")
+            return
+        }
+
+        todo_arr.push({
+            id: todo_arr.length + 1,
+            task: todo_text,
+            isDone: false
+        })
+        renderTodolist()
+        clearForm()
+    })
+
+    todo_input.addEventListener('keypress', function(e){
+        if (e.key == 'Enter') {
+            btn_add.click()
+            renderTodolist()
+        }
+    })
+
+    function deleteTask(id) {
+        const index = todo_arr.findIndex(item => item.id === id)
+        if (index !== -1) {
+            if(confirm("Are you sure to delete this task?")){
+                todo_arr.splice(index, 1)
+            }
+        }
+        renderTodolist()
+    }
+
+    function EditTask(id) {
+        const index = todo_arr.findIndex(item => item.id === id)
+        if (index !== -1) {
+            let newTask = prompt("Edit your task:", todo_arr[index].task)
+            if (newTask !== null && newTask.trim() !== "") {
+                const exists = todo_arr.some(t => t.task.toLowerCase() === newTask.trim().toLowerCase() && t.id !== todo_arr[index].id)
+                if (exists) {
+                    alert("This task already exists!")
+                    return
+                }
+                todo_arr[index].task = newTask.trim()
+            }
+        }
+        renderTodolist()
+        clearForm()
+    }
+
+    function DoneTask(id) {
+        const index = todo_arr.findIndex(item => item.id === id)
+        if (index !== -1) {
+                todo_arr[index].isDone = todo_arr[index].isDone === true
+        }
+        renderTodolist()
+    }
+
+    function clearForm() {
+        todo_input.value = ""
+        todo_input.focus()
+    }
+</script>
+</body>
+</html>
