@@ -212,7 +212,7 @@
     function DoneTask(id) {
         const index = todo_arr.findIndex(item => item.id === id)
         if (index !== -1) {
-                todo_arr[index].isDone = todo_arr[index].isDone === true
+                todo_arr[index].isDone = ! todo_arr[index].isDone
         }
         renderTodolist()
     }
